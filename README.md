@@ -12,7 +12,7 @@ the [SnowConvert tool](https://www.mobilize.net/products/database-migrations/sno
 - [Export Scripts for Redshift](https://github.com/MobilizeNet/SnowConvertDDLExportScripts/tree/main/Redshift)
 - [Export Scripts for Netezza](https://github.com/MobilizeNet/SnowConvertDDLExportScripts/tree/main/Netezza)
 - [Export Scripts for Vertica](https://github.com/MobilizeNet/SnowConvertDDLExportScripts/tree/main/Vertica)
-
+- [Export Scripts for Hive](https://github.com/MobilizeNet/SnowConvertDDLExportScripts/tree/main/Hive)
 
 ![SnowConvert Machine](https://www.mobilize.net/hubfs/1-Website%20Assets/svg%20by%20Ado/SnowConvert%20Migrations%20machine.svg)
 
