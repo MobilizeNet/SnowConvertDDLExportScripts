@@ -26,7 +26,7 @@ all_db_names=${databases}
 for db in $all_db_names
 do
   expfile=$root/${db}.sql
-  #echo " " > $expfile
+  
   tables=$(${hivecmd} "show tables in ${db};")
   all_tab_names=`echo "${tables}"`
   
