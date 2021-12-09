@@ -1,14 +1,16 @@
 # BigQuery DDL Export Scripts
 
-These scripts can be used to perform a BigQuery Data Export.
+This repository provides some simple scripts to help exporting your BigQuery code so it can be migrated to Snowflake using SnowConvert.
 
 ## Version
 
-Release 2021-12-02
+Version 1.0 Release 2021-12-02
 
 ## Usage
 
-The following are the steps to execute the DDL Code Generation. They can be executed in Linux/Unix and Windows enviroments.
+The following are the steps to execute the DDL Code Generation. They can be executed in Linux/Unix.
+
+Remove Windows. We might add a side note on how to execute them on Windows
 
 ## How does this work?
 
@@ -16,16 +18,16 @@ The script `create_ddls.sh` will connect to your database and create a collectio
 
 ## Prerequisits
 
-1. Follow [these](https://cloud.google.com/sdk/docs/install#linux) instructions for installing Cloud SDK.
-2. It is recommended to use a user  with **Admin** or **Owner** privileges
-2. The user must be granted with a role with the `bigquery.datasets.get` permission. If there is no roles with it, you could create a custom role just for this.
+1. Cloud SDK needs to be installed. If you have not installed it, you can follow [these](https://cloud.google.com/sdk/docs/install#linux) instructions.
+2. The user must have Admin or Owner priviledges.
+3. The user must be granted with a role with the `bigquery.datasets.get` permission. If there is no roles with it, you could create a custom role just for this.
 
 
-## How are these scripts used ?
+## Usage
 
-In order to use them.
+The following are the steps to execute the DDL Code Generation. They can be executed in Linux/Unix environments.
 
-1. Modify the `create_ddls.sh`
+1. Modify the `create_ddls.sh` that is located in the `bin` folder
 
 1.1 The region setting will be at the top of this file.
 
