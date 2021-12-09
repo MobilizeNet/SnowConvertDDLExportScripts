@@ -6,7 +6,10 @@ echo " "
 echo " +-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+ +-+-+ +-+-+-+-+-+-+-+-+-+-+-+-+"
 echo " |B|i|g|Q|u|e|r|y| |E|x|p|o|r|t| |b|y| |M|o|b|i|l|i|z|e|.|N|e|t|"
 echo " +-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+ +-+-+ +-+-+-+-+-+-+-+-+-+-+-+-+"
+echo " Version 1.0"
+echo " +-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+ +-+-+ +-+-+-+-+-+-+-+-+-+-+-+-+"
 echo " "
+
 
 echo "Extracting DDLs from region $REGION"
 echo "Creating Output Folder..."
