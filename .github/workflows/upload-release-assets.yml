@@ -88,7 +88,7 @@ jobs:
         with:
           files: BigQuery/
           recursive: false
-          dest: bigquery.zip            
+          dest: bigquery.zip
 
       - name: Upload DB2 Release Asset
         id: upload-db2-asset 
@@ -187,4 +187,4 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./bigquery.zip
           asset_name: bigquery.zip
-          asset_content_type: application/zip 
+          asset_content_type: application/zip

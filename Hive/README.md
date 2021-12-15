@@ -3,49 +3,22 @@
 This repository provides some simple scripts to help exporting your Hive code
 so it can be migrated to [Snowflake](https://www.snowflake.com/) using [SnowConvert](https://www.mobilize.net/products/database-migrations/snowconvert)
 
-## Version
+## Version 1.1
 
-Release 2021-10-14
+Release 2021-12-03
 
 ## Usage
 
-Create a shell script with the following contents:
+The following are the steps to execute the DDL Code Generation. They can be executed in Linux/Unix.
 
-```
-#!/bin/bash
-hiveDBName=testdbname;
+1 - Modify `exp_ddl.sh` – Using a text editor modify the following parameters:
 
-showcreate="show create table "
-showpartitions="show partitions "
-terminate=";"
+* `HOST`
+* `PORT`
 
-tables=`hive -e "use $hiveDBName;show tables;"`
-tab_list=`echo "${tables}"`
+2 - After modifying, the `exp_ddl.sh` file can be run from the command line to execute the extract.  The following files will be created in the current directory under `ddl_extract`:
 
-rm -f ${hiveDBName}_all_table_partition_DDL.txt
-
-for list in $tab_list
-do
-   showcreatetable=${showcreatetable}${showcreate}${list}${terminate}
-   listpartitions=`hive -e "use $hiveDBName; ${showpartitions}${list}"`
-
-   for tablepart in $listpartitions
-   do
-      partname=`echo ${tablepart/=/=\"}`
-      echo $partname
-      echo "ALTER TABLE $list ADD PARTITION ($partname\");" >> ${hiveDBName}_all_table_partition_DDL.txt
-   done
-
-done
-
-echo " ====== Create Tables ======= : " $showcreatetable
-
-## Remove the file
-rm -f ${hiveDBName}_extract_all_tables.txt
-
-hive -e "use $hiveDBName; ${showcreatetable}" >> ${hiveDBName}_extract_all_tables.txt
-```
-
+`./exp_ddl.sh`
 
 ## Reporting issues and feedback
 
