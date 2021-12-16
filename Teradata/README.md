@@ -4,7 +4,7 @@ This repository provides some simple scripts to help exporting your Teradata cod
 
 ## Version
 
-Release 2020-01-28
+Release 2021-12-10
 
 ## Usage
 
@@ -81,14 +81,6 @@ These collect information about certain column types in which information about 
 This file returns results showing any test failures for views that are not valid.
 
 * `invalid_objects.log`
-
-### TPT Script Files
-
-These files contain auto-generated scripts which can later be used in the data migration process.
-
-* `tpt_export_single_script.tpt`
-* `tpt_export_multiple_scripts.tpt`
-* `tables_not_in_tpt_scripts.txt`
 
 3 - After a successful run, remove logon information from the top line of each of the files in the scripts folder as well as the `create_ddls.sh` file. Compress the entire Teradata Source Extract and return to Snowflake. Please do not modify or remove any files so that we can review logs as needed.
 
