@@ -4,52 +4,55 @@ This repository provides some simple scripts to help exporting your SQLServer co
 
 ## Version
 
-Version 1.1 
-Release 2021-09-07
+Version 1.7
+Release 2021-12-10
 
 ## Usage
 
-The `extract-sql-server-ddl.ps1` script attempts to connect to an instance of SQL Server using either Windows or SQL authentication and, for each database that survives inclusion/exclusion filters, retrieves certain object definitions as individual DDL files to a local directory. 
+The `extract-sql-server-ddl.ps1` script attempts to connect to an instance of SQL Server and, for each database/schema that survives inclusion/exclusion filters, retrieves object Data Definition Language (DDL) to files in a specified directory.
 
 **SQL Server tested versions**: `SQL Server 2019`, `Azure SQLDatabase`
 
 The script use the following parameters:
 
-* **ServerName**: Specifies the SQL Server instance to use
-* **Port**: Specifies the port to use (default is 1433)
-* **SqlAuthentication**: Bypass "normal" Windows Authentication when attempting to connect (default is false)
-* **UserId**: Specifies the user name to use when attempting to connect (used in conjunction with -SqlAuthentication)
-* **Password**: Specifies the password associated with the UserId to use when attempting to connect (used in conjunction with -SqlAuthentication)
-* **IncludeSystemObjects**: Specify whether to include databases, schemas, and tables tagged as SQL Server system objects (default is false)
-* **IncludeDatabases**: Specifies databases that match the listed pattern(s) be included in the extraction (default is all)
-* **ExcludeDatabases**: Specifies databases that match the listed pattern(s) be excluded from the extraction (default is none)
-* **ScriptDirectory**: Specifies the root directory in which the extracted files are to be stored (default is C:\MyScriptsDirectory)
-* **INPUTS**: None.  You cannot pipe objects to extract-sql-server-ddl.ps1.
-* **OUTPUTS**: System.String.
+* **ServerInstance**: Specifies the instance to use.  Format is [[\<server>]\[\<named_instance>]] (i.e., \\\<named_instance>, \<server>, \<server>\\\<named_instance>, or not specified).  If not specified, use the default instance on the local server.
+* **Port**: Specifies the port to use when connecting to <server>.  Overrides a <named_instance> if specified in -ServerInstance and forces -UseTcp.  Default is none.
+* **UseTcp**: Specify whether to use the TCP format when connecting to -ServerInstance. Default is to not use TCP format.
+* **UserName**: Specifies the user name to use with SQL Authentication.  If not specified, use the current user with Windows Authentication.
+* **Password**: Specifies the password associated with -UserName (otherwise prompted interactively if -UserName is specified).
+* **ScriptDirectory**: Specifies the root directory under which server-, instance-, database-, and object-related files are stored.  Default is 'C:\MyScriptsDirectory'.
+* **IncludeDatabases**: Specifies which database(s) to include via a comma-delimited list of patterns (using PowerShell -match syntax).  Default is to include all databases other than SQL Server system databases.
+* **ExcludeDatabases**: Specifies which database(s) to exclude via a comma-delimited list of patterns (using PowerShell -match syntax).  Default is to exclude none.
+* **IncludeSchemas**: Specifies which schema(s) to include via a comma-delimited list of patterns (using PowerShell -match syntax).  Default is to include all.
+* **ExcludeSchemas**: Specifies which schema(s) to exclude via a comma-delimited list of patterns (using PowerShell -match syntax).  Default is to exclude none.
+* **IncludeSystemDatabases**: Specify whether to include SQL Server system databases prior to applying inclusion/exclusion filters.  Default is false.
+* **ExistingDirectoryAction**: Specify whether to (non-interactively) 'delete' or 'keep' existing directories where encountered.  Default is to prompt interactively.
+* **NoSysAdminAction**: Specify whether to (non-interactively) 'stop' or 'continue' when the -UserName does not have the sysadmin role on -ServerInstance.  Default is to prompt interactively.
 
-> **_NOTE:_**  For named instances, use  hostname\InstanceName
 
-Here some examples of how use the script:
+**INPUTS**: None.  You cannot pipe objects to extract-sql-server-ddl.ps1.
 
-Example 1:
+**OUTPUTS**: System.String.
+
+## Here some examples of how use the script:
+
+Example 1: connect to the default instance on the local server using Windows Authentication
 
 ```ps
 PS> .\extract-sql-server-ddl.ps1
 ```
 
-Example 2:
+Example 2: connect to the instance listening on port 1500 on server foo.mydomain.com
 
 ```ps
-PS> .\extract-sql-server-ddl.ps1 -ServerName foo.mydomain.com -Port 1500
+PS> .\extract-sql-server-ddl.ps1 -ServerInstance foo.mydomain.com -Port 1500
 ```
 
-Example 2:
+Example 3: connect as juser using SQL Authentication to the default instance on foo.database.windows.net
 
 ```ps
-PS> .\extract-sql-server-ddl.ps1 -SqlAuthentication -ServerName foo.database.windows.net
+PS> .\extract-sql-server-ddl.ps1 -UserName juser -ServerInstance foo.database.windows.net 
 ```
-
-
 
 ## Reporting issues and feedback
 
