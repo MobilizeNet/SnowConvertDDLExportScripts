@@ -348,6 +348,31 @@ select TRIM(owner),TRIM(table_name), num_rows, NVL(round((avg_row_len*num_rows)/
 
 spool off
 
+spool object_extracts/DDL/DDL_MATERIALIZED_VIEWS.sql
+
+SELECT '/* <sc-table_comments> ' || owner || '.' || table_name || ' </sc-table_comments> */', dbms_metadata.get_dependent_ddl( 'COMMENT', table_name, owner ) 
+FROM (select distinct table_name, owner  from dba_col_comments WHERE COMMENTS is not null 
+	union select distinct table_name, owner  from dba_tab_comments WHERE COMMENTS is not null 
+	  )
+WHERE owner &1 &2
+AND owner NOT &3 &4 
+AND owner NOT IN ('EXFSYS','SYSMAN','DMSYS','ANONYMOUS','APPQOSSYS','AUDSYS','CTXSYS','DBSFWUSER','DBSNMP','DVF','DVSYS','GGSYS','GSMADMIN_INTERNAL','LBACSYS','MDDATA','MDSYS','OJVMSYS','OLAPSYS','OUTLN','ORACLE_OCM','ORDDATA','ORDPLUGINS','ORDSYS','REMOTE_SCHEDULER_AGENT','SYS','SYSTEM','WMSYS','XDB')
+AND owner NOT LIKE 'DBA%'
+AND owner NOT LIKE 'APEX%'
+AND (owner, table_name) not in (select owner, table_name from dba_nested_tables)
+AND (owner, table_name) not in (select owner, table_name from dba_tables where iot_type = 'IOT_OVERFLOW');
+
+SELECT '/* <sc-materialized_view> ' || owner || '.' || MVIEW_NAME || ' </sc-materialized_view> */',dbms_metadata.get_dependent_ddl( 'COMMENT', MVIEW_NAME, owner ) 
+FROM ( select distinct MVIEW_NAME, owner  from DBA_MVIEW_COMMENTS WHERE COMMENTS is not null )
+WHERE owner &1 &2
+AND owner NOT &3 &4 
+AND owner NOT IN ('EXFSYS','SYSMAN','DMSYS','ANONYMOUS','APPQOSSYS','AUDSYS','CTXSYS','DBSFWUSER','DBSNMP','DVF','DVSYS','GGSYS','GSMADMIN_INTERNAL','LBACSYS','MDDATA','MDSYS','OJVMSYS','OLAPSYS','OUTLN','ORACLE_OCM','ORDDATA','ORDPLUGINS','ORDSYS','REMOTE_SCHEDULER_AGENT','SYS','SYSTEM','WMSYS','XDB')
+AND owner NOT LIKE 'DBA%'
+AND owner NOT LIKE 'APEX%';
+
+spool off
+
+
 execute dbms_metadata.set_transform_param (dbms_metadata.session_transform, 'DEFAULT');
 
 quit
