@@ -1,9 +1,7 @@
-import boto3
+from _boto3_client import get_client
 import os
 import re
-import multiprocessing as mp
-print("Number of processors: ", mp.cpu_count())
-
+import sys
 import time
 
 '''
@@ -12,44 +10,56 @@ import time
 ===========================
 '''
 
+class Query:
+
+    object_type = None
+    query_text = None
+    query_id = None
+    query_response = None
+
+    def __init__(self, object_type, query_text):
+
+        self.object_type = object_type
+        self.query_text = query_text
+
+    def is_query_valid(self, client):
+        resp = client.describe_statement(Id=self.query_id)
+        return resp['ResultRows'] >= 0
+
+    def save_code(self, client):
+        if self.is_query_valid(client):
+            resp = client.get_statement_result(Id=self.query_id)
+            code = []
+            for row in resp['Records']:
+                code.append(row[0]['stringValue'] + '\n')
+            with open(f'out/DDL_{self.object_type}.sql', 'w') as f:
+                f.writelines(code)
+            return True
+        else:
+            return False
+
+
 def read_ddl_queries():
-    queries_dict = {}
+    queries = []
     for f in os.listdir('.'):
         if f.endswith(".sql"):
             object_type = re.search(r'^(.*)_ddl\.sql', f, )
-            with open(f,'r') as file:
-                queries_dict[object_type.group(1)] = file.read()
-    return queries_dict
+            with open(f, 'r') as file:
+                queries.append(Query(object_type.group(1), file.read()))
+                #queries_dict[object_type.group(1)] = file.read()
+    return queries
 
 
-def execute_ddl_queries(object_type):
-    resp = RS_CLIENT.execute_statement(
-        ClusterIdentifier='redshift-cluster-1'
-        , Database=RS_DATABASE
-        , SecretArn=RS_SECRET_ARN
-        , Sql=QUERIES[object_type]
-        , StatementName=f'mobilize_ddl_extraction_{object_type}'
-    )
-    return resp['Id']
-
-
-def is_query_valid(query_id):
-    resp = RS_CLIENT.describe_statement(Id=query_id)
-    return resp['ResultRows'] >= 0
-
-
-def iterate_query_result(query_id):
-    code = []
-    if is_query_valid(query_id):
-        resp = RS_CLIENT.get_statement_result(Id=query_id)
-        for row in resp['Records']:
-            code.append(row[0]['stringValue'] + '\n')
-    return code
-
-
-def save_results(object_type, code):
-    with open(f'out/DDL_{object_type}.sql', 'w') as f:
-        f.writelines(code)
+def execute_ddl_queries():
+    for q in QUERIES:
+        resp = RS_CLIENT.execute_statement(
+            ClusterIdentifier=RS_CLUSTER
+            , Database=RS_DATABASE
+            , SecretArn=RS_SECRET_ARN
+            , Sql=q.query_text
+            , StatementName=f'mobilize_ddl_extraction_{q.object_type}'
+        )
+        q.query_id = resp['Id']
 
 '''
 =================================
@@ -57,33 +67,30 @@ def save_results(object_type, code):
 =================================
 '''
 
+args = sys.argv
+
 QUERIES = read_ddl_queries()
-RS_CLIENT = boto3.client('redshift-data')
+RS_CLIENT = get_client()
+'''
+RS_CLUSTER = args[1]
+RS_DATABASE = args[2]
+RS_SECRET_ARN = args[3]
+'''
+
+RS_CLUSTER = 'redshift-cluster-1'
 RS_DATABASE = 'dev'
 RS_SECRET_ARN = 'arn:aws:secretsmanager:us-east-2:049502660834:secret:dev/redsfhift-cluster-1-edSdeq'
 
-query_id = execute_ddl_queries('table')
-print(query_id)
+execute_ddl_queries()
 
-i = 0
-
-valid_query = False
-
-while(i < 15):
-    print(f'Validation number {i}')
-    valid_query = is_query_valid(query_id)
-    if valid_query:
-        c = iterate_query_result(query_id)
-        save_results('table', c)
-        break
-    time.sleep(1)
-    i += 1
+for q in QUERIES:
+    i = 0
+    while i < 15:
+        print(f'Validation number {i}')
+        if q.save_code(RS_CLIENT):
+            break
+        time.sleep(1)
+        i += 1
 
 if __name__ == 'main':
     pass
-
-
-
-
-
-
