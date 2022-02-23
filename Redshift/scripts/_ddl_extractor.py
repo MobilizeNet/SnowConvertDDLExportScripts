@@ -32,7 +32,10 @@ class Query:
             code = []
             for row in resp['Records']:
                 code.append(row[0]['stringValue'] + '\n')
-            with open(f'out/DDL_{self.object_type}.sql', 'w') as f:
+            object_type_title = self.object_type.title()
+            filename = f'out/DDL_{object_type_title}.sql'
+            print(filename)
+            with open(filename, 'w') as f:
                 f.writelines(code)
             return True
         else:
