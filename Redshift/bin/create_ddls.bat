@@ -12,6 +12,7 @@ REM AWS RedShift Variables
 SET RS_CLUSTER="<redshift_cluster_identifier>"
 SET RS_DATABASE="<redshift_database>"
 SET RS_SECRET_ARN="<secret_arn>"
+SET SCHEMA_FILTER="lower(schemaname) LIKE '%'"
 REM ---- END: Variables to change ----
 
 mkdir %OUTPUT_PATH%
@@ -22,4 +23,4 @@ mkdir %OUTPUT_PATH%\object_extracts\DDL
 REM mkdir %OUTPUT_PATH%\object_extracts\Reports
 REM mkdir %OUTPUT_PATH%\object_extracts\Storage
 
-python ../scripts/_ddl_extractor.py %RS_CLUSTER% %RS_DATABASE% %RS_SECRET_ARN% %OUTPUT_PATH%
+python ../scripts/_ddl_extractor.py %RS_CLUSTER% %RS_DATABASE% %RS_SECRET_ARN% %OUTPUT_PATH% %SCHEMA_FILTER%

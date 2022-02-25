@@ -13,19 +13,20 @@ import time
 
 class Query:
 
-    def __init__(self, object_type, query_text, out_path):
+    def __init__(self, object_type, query_text, out_path, schema_filter):
 
         self.object_type = object_type
-        self.query_text = query_text
+        self.query_text = query_text.format(**{'schema_filter': schema_filter})
         self.query_id = None
         self.query_response = None
         self.code = []
         self.out_path = out_path
 
+
     def is_query_valid(self, client):
         resp = client.describe_statement(Id=self.query_id)
         if 'Error' in resp:
-            # Raise exception here if error
+            print('Error')
             pass
         else:
             return resp['ResultRows'] >= 0
@@ -56,8 +57,8 @@ class Query:
 
 class ProcedureQuery(Query):
 
-    def __init__(self, object_type, query_text, out_path):
-        super().__init__(object_type, query_text, out_path)
+    def __init__(self, object_type, query_text, out_path, schema_filter):
+        super().__init__(object_type, query_text, out_path, schema_filter)
 
         self.batch_query_ids = []
         self.failed_statements = []
@@ -165,9 +166,9 @@ def read_ddl_queries():
                 object_type = object_type_regex.group(1)
                 file_content = file.read()
                 if object_type == 'procedure':
-                    queries.append(ProcedureQuery(object_type, file_content, OUT_PATH))
+                    queries.append(ProcedureQuery(object_type, file_content, OUT_PATH, SCHEMA_FILTER))
                 else:
-                    queries.append(Query(object_type, file_content, OUT_PATH))
+                    queries.append(Query(object_type, file_content, OUT_PATH, SCHEMA_FILTER))
 
     return queries
 
@@ -199,13 +200,14 @@ RS_CLUSTER = args[1]
 RS_DATABASE = args[2]
 RS_SECRET_ARN = args[3]
 OUT_PATH = args[4]
+SCHEMA_FILTER = args[5]
 '''
 RS_CLIENT = get_client()
 RS_CLUSTER = 'redshift-cluster-1'
 RS_DATABASE = 'dev'
 RS_SECRET_ARN = 'arn:aws:secretsmanager:us-east-2:049502660834:secret:dev/redsfhift-cluster-1-edSdeq'
 OUT_PATH = r'C:\work\06_redshift_extraction_scripts\out_testing'
-OUT_PATH = args[4]
+SCHEMA_FILTER = "lower(schemaname) LIKE 'public'"
 
 QUERIES = read_ddl_queries()
 execute_ddl_queries()
