@@ -250,4 +250,7 @@ FROM (
     )
     WHERE
       	schemaname not in ('information_schema', 'pg_catalog', 'pg_internal')
-);
+)
+WHERE
+{schema_filter}
+;

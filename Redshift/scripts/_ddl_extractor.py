@@ -115,7 +115,7 @@ class ProcedureQuery(Query):
                 self.procedures_processed = len(queries)
                 i = 0
                 batch = 0
-                batches = self.procedures_processed / 40
+                batches = abs(self.procedures_processed / 40)
                 while i < self.procedures_processed:
                     print(f'Sending batch {batch}/{batches}')
                     edge = i + 40 if i + 40 < self.procedures_processed else self.procedures_processed
@@ -130,7 +130,7 @@ class ProcedureQuery(Query):
                     i += 40
                     batch += 1
                     if i % 200:
-                        time.sleep(0.2)
+                        time.sleep(BATCH_WAIT)
                 return True
             else:
                 # Log no procedures where found
@@ -201,13 +201,14 @@ RS_DATABASE = args[2]
 RS_SECRET_ARN = args[3]
 OUT_PATH = args[4]
 SCHEMA_FILTER = args[5]
+BATCH_WAIT = int(args[6])
 '''
 RS_CLIENT = get_client()
 RS_CLUSTER = 'redshift-cluster-1'
 RS_DATABASE = 'dev'
 RS_SECRET_ARN = 'arn:aws:secretsmanager:us-east-2:049502660834:secret:dev/redsfhift-cluster-1-edSdeq'
 OUT_PATH = r'C:\work\06_redshift_extraction_scripts\out_testing'
-SCHEMA_FILTER = "lower(schemaname) LIKE 'public'"
+SCHEMA_FILTER = "lower(schemaname) LIKE '%'"
 
 QUERIES = read_ddl_queries()
 execute_ddl_queries()

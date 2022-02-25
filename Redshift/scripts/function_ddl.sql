@@ -167,4 +167,6 @@ FROM
 		udfoid
 		, seq
 )
+WHERE
+{schema_filter}
 ;

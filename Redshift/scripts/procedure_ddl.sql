@@ -57,4 +57,7 @@ FROM
         schemaname
         , proc_name
         , proc_oid, seq
-);
+)
+WHERE
+{schema_filter}
+;
