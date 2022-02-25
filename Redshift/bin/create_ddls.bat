@@ -5,8 +5,7 @@ REM                       below to match your environment. Once completed, your 
 REM ---- Variables to change ----
 
 REM General Variables
-REM SET OUTPUT_PATH="<output_path>"
-SET OUTPUT_PATH="C:\work\06_redshift_extraction_scripts\SnowConvertDDLExportScripts\_rs_test"
+SET OUTPUT_PATH="<output_path>"
 
 REM AWS RedShift Variables
 SET RS_CLUSTER="<redshift_cluster_identifier>"
@@ -14,7 +13,7 @@ SET RS_DATABASE="<redshift_database>"
 SET RS_SECRET_ARN="<secret_arn>"
 
 REM Script Variables
-SET SCHEMA_FILTER="lower(schemaname) LIKE '%'"
+SET SCHEMA_FILTER="lower(schemaname) LIKE '%%'"
 SET BATCH_WAIT="0.2"
 REM ---- END: Variables to change ----
 

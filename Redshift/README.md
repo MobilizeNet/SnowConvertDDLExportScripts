@@ -4,53 +4,47 @@ This repository provides some simple scripts to help exporting your Redshift Cod
 
 ## Version
 
-Release 2019-03-24
+Release 2021-02-25
 
 ## Usage
 
-View to get the DDL for a table.  This will contain the distkey, sortkey, constraints, not null, defaults, etc.
+To start, please download this folder into your computer.
 
-Original Source: https://github.com/awslabs/amazon-redshift-utils/blob/master/src/AdminViews/v_generate_tbl_ddl.sql
+### Prerequisites
 
-         
-## **Notes**:   
-* Default view ordering causes foreign keys to be created at the end.
-* This is needed due to dependencies of the foreign key constraint and the tables it links.  
-* Due to this one should not manually order the output if you are expecting to be able to replay the SQL directly from the VIEW query result. It is still possible to order if you filter out the FOREIGN KEYS and then apply them later.
-* The following filters are useful:
-```sql
-    where ddl not like 'ALTER TABLE %'  -- do not return FOREIGN KEY CONSTRAINTS
-```
-```sql
-    where ddl like 'ALTER TABLE %'      -- only get FOREIGN KEY CONSTRAINTS
-```
-```sql
-    where tablename in ('t1', 't2')     -- only get DDL for specific tables
-```
-```sql
-    where schemaname in ('s1', 's2')    -- only get DDL for specific schemas
-```
-         
- So for example if you want to order DDL on tablename and only want the tables 't1', 't2' and 't4' you can do so by using a query like:
-```sql
-    select ddl from (
-        (
-        select
-            *
-        from admin.v_generate_tbl_ddl
-        where ddl not like 'ALTER TABLE %'
-        order by tablename
-        )
-        UNION ALL
-        (
-        select
-            *
-        from admin.v_generate_tbl_ddl
-        where ddl like 'ALTER TABLE %'
-        order by tablename
-        )
-    ) where tablename in ('t1', 't2', 't4');
-```
+This script uses Python and boto3 library as the API to connect and communicate with AWS services. In order for this to work you would first need to:
+
+* Download Python for your OS [here](https://www.python.org/downloads/). There's an initialization script for both Windows or Unix-based environment.
+* After installing Python, install the boto3 library by executing: `pip install boto3`
+* Create a Secret in the AWS Secrets Manager with the `username`, `password`, `engine`, `host`, `port` and `dbClusterIdentifier`. The keys must be named as mentioned.  
+* Configure your AWS credentials into your computer. There are several ways to do this, the default and most recommended is creating a credentials file as shown [here](https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.html).
+> If your organization has more strict controls, you can also modify the `get_client` function in the `scripts/_boto_3_client.py` file to change parameters specifically for your organization's requirements. More details on the options can be found [here](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html).
+
+After completing these steps, you're now ready to execute the script.
+
+### Usage
+
+To use the script, follow these steps:
+
+* Navigate to the bin folder, and open the `create_ddls.bat` or `create_ddls.sh`, depending on your environment in a text editor.
+* In here, modify these variables:
+
+Variable|Description|Must be modified|
+--- | --- | ---
+OUTPUT_PATH|Output folder where the results will be saved to.|Y
+RS_CLUSTER|Your Redshift Cluster identifier.|Y
+RS_DATABASE|The Redshift Database that you're interested in extracting.|Y
+RS_SECRET_ARN|The Secret ARN with your credentials.|Y
+SCHEMA_FILTER|SQL statement to filter the schemas you're interested in. By default the script ignores the `pg_catalog`, `pg_internal` and `information_schema` schemas.|N
+BATCH_WAIT|The only way provided by Redshift to get the code for procedures without losing parameters' precision is by executing `SHOW PROCEDURE <procedure>`. This means that we have to query each procedure one by one, which means that a lot of queries are sent to the database at the same time. If you're having issues with Maximum concurrent statements, you can increase this value to send the batches in a more controlled manner. This will increase extraction time considerably on databases with a big number of procedures. The default value is 0.2 seconds.|N
+
+* After modifying these variables, execute the scripts and your DDL Code should be extracted. 
+
+## Notes
+
+* Since the procedures extraction needs to be made individually, on big workloads the process might take more than 30 minutes. This was tested on a database with 10.000 procedures on a single-node dc2.large cluster and it took approximately 40 minutes.
+* To avoid extracting a specific object, you can change the extension of the .sql file of the object you want to ignore. For example, if you want to avoid extracting procedures, rename the `procedure_ddl.sql` to `procedure_ddl.sql.ignore`.
+* These scripts were based on the queries on [this repository](https://github.com/awslabs/amazon-redshift-utils/tree/master/src/AdminViews) and they were modified slightly or not at all. 
 
 ## Reporting issues and feedback
 
