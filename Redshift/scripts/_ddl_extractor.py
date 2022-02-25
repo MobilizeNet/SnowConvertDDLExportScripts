@@ -26,7 +26,7 @@ class Query:
     def is_query_valid(self, client):
         resp = client.describe_statement(Id=self.query_id)
         if 'Error' in resp:
-            print('Error')
+            raise RuntimeError(resp['Error'])
             pass
         else:
             return resp['ResultRows'] >= 0
@@ -82,7 +82,7 @@ class ProcedureQuery(Query):
                 if statement['Status'] == 'FINISHED':
                     finished_statements_temp.append({'id': statement_id, 'object_name': object_name_regex.group(1)})
                 elif statement['Status'] == 'FAILED':
-                    failed_statements_temp.append({'id': statement_id, 'object_name': object_name_regex.group(1)})
+                    failed_statements_temp.append({'id': statement_id, 'object_name': object_name_regex.group(1), 'Error': statement['Error']})
                 else:
                     return False
             else:
@@ -218,7 +218,12 @@ for q in QUERIES:
     print(f'Validating query result for {q.object_type}')
     while i < 60:
         print(f'Validation number {i}')
-        if q.get_code(RS_CLIENT):
+        try:
+            if q.get_code(RS_CLIENT):
+                break
+        except RuntimeError as e:
+            print(f'Failed to extract data for {q.object_type}. Failed query with error message:')
+            print(e)
             break
         time.sleep(5)
         i += 1
