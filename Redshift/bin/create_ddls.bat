@@ -22,4 +22,4 @@ mkdir %OUTPUT_PATH%\object_extracts\DDL
 REM mkdir %OUTPUT_PATH%\object_extracts\Reports
 REM mkdir %OUTPUT_PATH%\object_extracts\Storage
 
-python ../scripts/_ddl_extractor.py %RS_CLUSTER% %RS_DATABASE% %RS_SECRET_ARN%
+python ../scripts/_ddl_extractor.py %RS_CLUSTER% %RS_DATABASE% %RS_SECRET_ARN% %OUTPUT_PATH%

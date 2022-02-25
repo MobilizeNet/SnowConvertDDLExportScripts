@@ -13,13 +13,14 @@ import time
 
 class Query:
 
-    def __init__(self, object_type, query_text):
+    def __init__(self, object_type, query_text, out_path):
 
         self.object_type = object_type
         self.query_text = query_text
         self.query_id = None
         self.query_response = None
         self.code = []
+        self.out_path = out_path
 
     def is_query_valid(self, client):
         resp = client.describe_statement(Id=self.query_id)
@@ -39,11 +40,15 @@ class Query:
             return False
 
     def save_code(self):
-        object_type_title = self.object_type.title()
-        filename = f'out/DDL_{object_type_title}.sql'
+        filename = self.get_output_path()
         print(filename)
         with open(filename, 'w') as f:
             f.writelines(self.code)
+
+
+    def get_output_path(self):
+        object_type_title = self.object_type.title()
+        return os.path.join(self.out_path, f'DDL_{object_type_title}.sql')
 
     def __str__(self):
         return self.object_type
@@ -51,8 +56,8 @@ class Query:
 
 class ProcedureQuery(Query):
 
-    def __init__(self, object_type, query_text):
-        super().__init__(object_type, query_text)
+    def __init__(self, object_type, query_text, out_path):
+        super().__init__(object_type, query_text, out_path)
 
         self.batch_query_ids = []
         self.failed_statements = []
@@ -100,9 +105,8 @@ class ProcedureQuery(Query):
                     param = row[1]['stringValue']
                     if object_name != current_proc:
                         queries.append(f'SHOW PROCEDURE {show_proc_code}')
-                        show_proc_code = f'{object_name}'
-                        current_proc = show_proc_code
-                        show_proc_code = f'{show_proc_code} {param}'
+                        current_proc = f'{object_name}'
+                        show_proc_code = f'{object_name} {param}'
                     else:
                         show_proc_code = f'{show_proc_code} {param}'
                 queries.append(f'SHOW PROCEDURE {show_proc_code}')
@@ -128,6 +132,7 @@ class ProcedureQuery(Query):
                         time.sleep(0.2)
                 return True
             else:
+                # Log no procedures where found
                 return False
         else:
             return False
@@ -144,8 +149,7 @@ class ProcedureQuery(Query):
                 proc_code = query_result['Records'][0][0]['stringValue']
                 proc_name = proc['object_name']
                 self.code.append(f'/* <sc-procedure> {proc_name} </sc-procedure> */\n\n{proc_code}\n')
-        object_type_title = self.object_type.title()
-        filename = f'out/DDL_{object_type_title}.sql'
+        filename = self.get_output_path()
         print(filename)
         with open(filename, 'w') as f:
             f.writelines(self.code)
@@ -161,9 +165,9 @@ def read_ddl_queries():
                 object_type = object_type_regex.group(1)
                 file_content = file.read()
                 if object_type == 'procedure':
-                    queries.append(ProcedureQuery(object_type, file_content))
+                    queries.append(ProcedureQuery(object_type, file_content, OUT_PATH))
                 else:
-                    queries.append(Query(object_type, file_content))
+                    queries.append(Query(object_type, file_content, OUT_PATH))
 
     return queries
 
@@ -185,21 +189,25 @@ def execute_ddl_queries():
 == Global variables definition ==
 =================================
 '''
+abspath = os.path.abspath(__file__)
+dir_name = os.path.dirname(abspath)
+os.chdir(dir_name)
 
 args = sys.argv
-
-QUERIES = read_ddl_queries()
-RS_CLIENT = get_client()
 '''
 RS_CLUSTER = args[1]
 RS_DATABASE = args[2]
 RS_SECRET_ARN = args[3]
+OUT_PATH = args[4]
 '''
-
+RS_CLIENT = get_client()
 RS_CLUSTER = 'redshift-cluster-1'
 RS_DATABASE = 'dev'
 RS_SECRET_ARN = 'arn:aws:secretsmanager:us-east-2:049502660834:secret:dev/redsfhift-cluster-1-edSdeq'
+OUT_PATH = r'C:\work\06_redshift_extraction_scripts\out_testing'
+OUT_PATH = args[4]
 
+QUERIES = read_ddl_queries()
 execute_ddl_queries()
 proc_query = None
 
@@ -220,7 +228,7 @@ for q in QUERIES:
 print('Validating individual queries for procedures')
 elapsed_validation = None
 elapsed_saving = None
-while i < 60:
+while i < 60 and proc_query is not None:
     start = time.time()
     if proc_query.validate_procedure_queries(RS_CLIENT):
         end = time.time()
