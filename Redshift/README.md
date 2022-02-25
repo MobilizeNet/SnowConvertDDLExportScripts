@@ -44,7 +44,8 @@ BATCH_WAIT|The only way provided by Redshift to get the code for procedures with
 
 * Since the procedures extraction needs to be made individually, on big workloads the process might take more than 30 minutes. This was tested on a database with 10.000 procedures on a single-node dc2.large cluster and it took approximately 40 minutes.
 * To avoid extracting a specific object, you can change the extension of the .sql file of the object you want to ignore. For example, if you want to avoid extracting procedures, rename the `procedure_ddl.sql` to `procedure_ddl.sql.ignore`.
-* These scripts were based on the queries on [this repository](https://github.com/awslabs/amazon-redshift-utils/tree/master/src/AdminViews) and they were modified slightly or not at all. 
+* These queries to extract the code were based on the queries on [this repository](https://github.com/awslabs/amazon-redshift-utils/tree/master/src/AdminViews) and they were modified slightly or not at all.
+* Extracting the information from Redshift is performed asynchronously. This means that when an statement is sent to the database, the code will continue executing. For this there is a Timeout of 5 minutes to wait for a query to finish executing and it will check every 5 seconds if it's finished. There will be improvements on this part on the future.
 
 ## Reporting issues and feedback
 
