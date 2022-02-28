@@ -37,15 +37,16 @@ RS_DATABASE|The Redshift Database that you're interested in extracting.|Y
 RS_SECRET_ARN|The Secret ARN with your credentials.|Y
 SCHEMA_FILTER|SQL statement to filter the schemas you're interested in. By default the script ignores the `pg_catalog`, `pg_internal` and `information_schema` schemas.|N
 BATCH_WAIT|The only way provided by Redshift to get the code for procedures without losing parameters' precision is by executing `SHOW PROCEDURE <procedure>`. This means that we have to query each procedure one by one, which means that a lot of queries are sent to the database at the same time. If you're having issues with Maximum concurrent statements, you can increase this value to send the batches in a more controlled manner. This will increase extraction time considerably on databases with a big number of procedures. The default value is 0.2 seconds.|N
+THREADS|Amount of threads to use to extract the code for procedures once their queries have been completed.|N
 
 * After modifying these variables, execute the scripts and your DDL Code should be extracted. 
 
 ## Notes
 
-* Since the procedures extraction needs to be made individually, on big workloads the process might take more than 30 minutes. This was tested on a database with 10.000 procedures on a single-node dc2.large cluster and it took approximately 40 minutes.
+* Since the procedures extraction needs to be made individually, on big workloads the process might take more than 30 minutes. This was tested on a database with 10.000 procedures on a single-node dc2.large cluster and it took approximately 40 minutes. To tackle this issue, multithreading has been applied to speed up this process. The amount of threads to be used can be specified with the `THREADS` parameter.
 * To avoid extracting a specific object, you can change the extension of the .sql file of the object you want to ignore. For example, if you want to avoid extracting procedures, rename the `procedure_ddl.sql` to `procedure_ddl.sql.ignore`.
 * These queries to extract the code were based on the queries on [this repository](https://github.com/awslabs/amazon-redshift-utils/tree/master/src/AdminViews) and they were modified slightly or not at all.
-* Extracting the information from Redshift is performed asynchronously. This means that when an statement is sent to the database, the code will continue executing. For this there is a Timeout of 5 minutes to wait for a query to finish executing and it will check every 5 seconds if it's finished. There will be improvements on this part on the future.
+* Extracting the information from Redshift is performed asynchronously. This means that when an statement is sent to the database, the code will continue executing. For this there is a Timeout of 5 minutes to wait for a query to finish executing and it will check every 5 seconds if it's finished.
 
 ## Reporting issues and feedback
 
