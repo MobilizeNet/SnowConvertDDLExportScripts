@@ -1,5 +1,5 @@
 SELECT
-    ddl
+    ddl as " "
 FROM
 (
     SELECT
@@ -20,5 +20,7 @@ FROM
         AND n.nspname not in ('information_schema', 'pg_catalog', 'pg_internal')
 )
 WHERE
-{schema_filter}
+    {schema_filter}
+    -- For manual runs, remove the above line and replace with something like this:
+    -- Example: lower(schemaname) LIKE '%'
 ;

@@ -1,4 +1,5 @@
-SELECT ddl
+SELECT
+    ddl as " "
 FROM (
 	SELECT table_id
 		, REGEXP_REPLACE(schemaname, '^zzzzzzzz', '') AS schemaname
@@ -252,5 +253,7 @@ FROM (
       	schemaname not in ('information_schema', 'pg_catalog', 'pg_internal')
 )
 WHERE
-{schema_filter}
+    {schema_filter}
+    -- For manual runs, remove the above line and replace with something like this:
+    -- Example: lower(schemaname) LIKE '%'
 ;
