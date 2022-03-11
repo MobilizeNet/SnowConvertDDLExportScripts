@@ -19,7 +19,7 @@ $RS_DATABASE="<Database name>"
 $RS_SECRET_ARN="<Secret ARN>"
 
 # Script Variables
-$SCHEMA_FILTER="lower(schemaname) LIKE '%%'"
+$SCHEMA_FILTER="lower(schemaname) LIKE '%'"
 $MAX_ITERATIONS=60 #Every iteration waits 5 seconds. Must be > 0.
 # ---- END: Variables to change ----
 
@@ -46,26 +46,30 @@ Write-Output "Creating output folders..."
 $ddl_output = "$OUTPUT_PATH\object_extracts\DDL"
 $log_output = "$OUTPUT_PATH\log"
 
+## Create directories
 New-Item -ItemType Directory -Force -Path $OUTPUT_PATH | Out-Null
 New-Item -ItemType Directory -Force -Path $log_output | Out-Null
 New-Item -ItemType Directory -Force -Path $OUTPUT_PATH\object_extracts | Out-Null
 New-Item -ItemType Directory -Force -Path $ddl_output | Out-Null
 
+## Created log files and tracking variables
 Out-File -FilePath $log_output\log.txt -InputObject "--------------" -Append
 Out-File -FilePath $log_output\log.txt -InputObject "Starting new extraction" -Append
 Out-File -FilePath $log_output\log.txt -InputObject "Variables:" -Append
 Out-File -FilePath $log_output\log.txt -InputObject $OUTPUT_PATH -Append
 Out-File -FilePath $log_output\log.txt -InputObject $SCHEMA_FILTER -Append
 
+# Defined main variables
 Write-Output "Getting queries from files..."
-$queries = @{}
-$files = (Get-ChildItem -Path ../scripts/* -Include *.sql).Name
+$queries = @{} # Hash to control queries execution
+$files = (Get-ChildItem -Path ../scripts/* -Include *.sql).Name # Get list of queries
 
 Write-Output "Sending queries to execute..."
 foreach ( $file in $files)
 {
     $query = Get-Content ..\scripts/$file -Raw
     $query = $query.replace('{schema_filter}', $SCHEMA_FILTER)
+    # Execute queries on Resdshift
     $response = aws redshift-data execute-statement --cluster-identifier $RS_CLUSTER --database $RS_DATABASE --secret-arn $RS_SECRET_ARN --sql "$query" | ConvertFrom-Json
     $queries[$file] = $response.Id
 }
@@ -80,15 +84,18 @@ while($i -ne $MAX_ITERATIONS)
     $i++
     if($queries.keys.count -ne 0)
     {
+        # List to remove queries from Hash for next iteration when finished
         $to_remove = [System.Collections.Generic.List[string]]::new()
         foreach( $query in $queries.keys )
         {
             $id = $queries[$query]
             Write-Output "Validating completion for query $query..."
+            # Get statement state
             $response = aws redshift-data describe-statement --id $id | ConvertFrom-Json
             if ($response.Status -eq "FINISHED")
             {
                 Write-Output "Query finished, starting extraction..."
+                # Get statement results when finished
                 $results_response = aws redshift-data get-statement-result --id $id | ConvertFrom-Json
                 $data = $results_response.Records
                 Out-File -FilePath $ddl_output\$query -InputObject "" -Encoding utf8
@@ -99,6 +106,7 @@ while($i -ne $MAX_ITERATIONS)
             } elseif ($response.Status -eq "FAILED") {
                 Write-Output "Query failed... Error message:"
                 Write-Output $response.Error
+                # Save errpr to log
                 Out-File -FilePath $log_output\log.txt -InputObject "Failed query:" -Append
                 Out-File -FilePath $log_output\log.txt -InputObject $query -Append
                 Out-File -FilePath $log_output\log.txt -InputObject $id -Append
@@ -115,6 +123,7 @@ while($i -ne $MAX_ITERATIONS)
     } else {
         break
     }
+    # Wait before continuing with next iteration
     Start-Sleep -Seconds 5
 }
 
