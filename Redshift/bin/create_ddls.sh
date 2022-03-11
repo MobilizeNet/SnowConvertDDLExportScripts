@@ -17,10 +17,7 @@ SCHEMA_FILTER="lower(schemaname) LIKE '%'"
 
 mkdir -p $OUTPUT_PATH
 mkdir -p $OUTPUT_PATH/log
-#mkdir -p $OUTPUT_PATH%/temp
 mkdir -p $OUTPUT_PATH/object_extracts
 mkdir -p $OUTPUT_PATH/object_extracts/DDL
-#mkdir -p $OUTPUT_PATH/object_extracts/Reports
-#mkdir -p $OUTPUT_PATH/object_extracts/Storage
 
 python ../scripts/_ddl_extractor.py --rs-cluster "$RS_CLUSTER" --rs-database "$RS_DATABASE" --rs-secret-arn "$RS_SECRET_ARN" --output-path "$OUTPUT_PATH" --schema-filter "$SCHEMA_FILTER"

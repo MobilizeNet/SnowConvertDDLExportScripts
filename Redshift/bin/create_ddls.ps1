@@ -106,7 +106,7 @@ while($i -ne $MAX_ITERATIONS)
             } elseif ($response.Status -eq "FAILED") {
                 Write-Output "Query failed... Error message:"
                 Write-Output $response.Error
-                # Save errpr to log
+                # Save error to log
                 Out-File -FilePath $log_output\log.txt -InputObject "Failed query:" -Append
                 Out-File -FilePath $log_output\log.txt -InputObject $query -Append
                 Out-File -FilePath $log_output\log.txt -InputObject $id -Append
