@@ -1,5 +1,5 @@
 SELECT
-    ddl as " "
+    ddl
 FROM (
 	SELECT table_id
 		, REGEXP_REPLACE(schemaname, '^zzzzzzzz', '') AS schemaname
@@ -222,7 +222,7 @@ FROM (
 		FROM pg_description des
 		JOIN pg_class c ON c.oid = des.objoid
 		JOIN pg_namespace n ON n.oid = c.relnamespace
-		LEFT JOIN information_schema."columns" cl ON cl.ordinal_position::INTEGER = des.objsubid
+		LEFT JOIN information_schema.columns cl ON cl.ordinal_position::INTEGER = des.objsubid
 			AND cl.table_name::NAME = c.relname
 		WHERE c.relkind = 'r'
 
@@ -255,5 +255,6 @@ FROM (
 WHERE
     {schema_filter}
     -- For manual runs, remove the above line and replace with something like this:
-    -- Example: lower(schemaname) LIKE '%'
+    -- Example:
+    -- lower(schemaname) LIKE '%'
 ;

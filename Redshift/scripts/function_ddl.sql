@@ -20,7 +20,7 @@ AS (
 		) t
 	)
 SELECT
-	ddl as " "
+	ddl
 FROM
 (
 	SELECT
@@ -35,7 +35,7 @@ FROM
 			, p.proname AS udfname
 			, p.oid AS udfoid
 			, 1 AS seq
-			, ('\n/* <sc-function> ' || n.nspname || '.' || p.proname || ' </sc-table> */\n')::VARCHAR(max) AS ddl
+			, ('\n/* <sc-function> ' || n.nspname || '.' || p.proname || ' </sc-function> */\n')::VARCHAR(max) AS ddl
 		FROM pg_proc p
 		LEFT JOIN pg_namespace n ON n.oid = p.pronamespace
 		JOIN pg_language l ON p.prolang = l.oid
@@ -170,5 +170,6 @@ FROM
 WHERE
     {schema_filter}
     -- For manual runs, remove the above line and replace with something like this:
-    -- Example: lower(schemaname) LIKE '%'
+    -- Example:
+    -- lower(schemaname) LIKE '%'
 ;

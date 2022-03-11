@@ -1,5 +1,5 @@
 SELECT
-    ddl as " "
+    ddl
 FROM
 (
     SELECT
@@ -22,5 +22,6 @@ FROM
 WHERE
     {schema_filter}
     -- For manual runs, remove the above line and replace with something like this:
-    -- Example: lower(schemaname) LIKE '%'
+    -- Example:
+    -- lower(schemaname) LIKE '%'
 ;
