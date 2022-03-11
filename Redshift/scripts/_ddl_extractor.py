@@ -42,6 +42,11 @@ class Query:
             resp = client.get_statement_result(Id=self.query_id)
             for row in resp['Records']:
                 self.code.append(row[0]['stringValue'] + '\n')
+            while('NextToken' in resp):
+                next_token = resp['NextToken']
+                resp = client.get_statement_result(Id=self.query_id, NextToken=next_token)
+                for row in resp['Records']:
+                    self.code.append(row[0]['stringValue'] + '\n')
             return True
         else:
             return False
@@ -64,7 +69,7 @@ def read_ddl_queries():
     queries = []
     for f in os.listdir('.'):
         if f.endswith(".sql") and '_manual_' not in f:
-            object_type_regex = re.search(r'^(.*)_ddl\.sql', f, )
+            object_type_regex = re.search(r'^DDL_(.*)\.sql', f, )
             with open(f, 'r') as file:
                 object_type = object_type_regex.group(1)
                 file_content = file.read()
@@ -113,7 +118,7 @@ SCHEMA_FILTER = args.schema_filter
 
 current_date = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
 log_path = os.path.join(OUT_PATH, 'log', f'{current_date}.log')
-logging.basicConfig(filename=log_path, encoding='utf-8', level=logging.INFO)
+logging.basicConfig(filename=log_path, level=logging.INFO)
 
 try:
     import boto3

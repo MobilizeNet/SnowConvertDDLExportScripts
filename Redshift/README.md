@@ -12,12 +12,14 @@ To start, please download this folder into your computer.
 
 This solution provides 2 alternatives to extract the data: 
 
-* Automatic: A script written with Python + boto3 (AWS Python API)
+* Automatic Windows: A script written with PowerShell + AWS Cli
+* Automatic Bash: A script written with Python + boto3 (AWS Python API)
 * Manual: SQL Queries to execute on your preferred SQL Editor
 
 ### Prerequisites
 
-Depending on the type of execution, the prerequisites are different, however, both require that the database user have access to the following tables:
+Depending on the type of execution, the prerequisites are different, however these are shared across all types:
+* Database user must have access to the following tables:
   * pg_namespace
   * pg_class
   * pg_attribute
@@ -32,7 +34,25 @@ Depending on the type of execution, the prerequisites are different, however, bo
 
 Specific requirements for each type are:
 
-#### Automatic
+#### Automatic Windows
+
+This script uses Python and boto3 library as the API to connect and communicate with AWS services. In order for this to work you would first need to:
+
+* Install AWS Cli. Instructions on how to install [can be found here](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+* Create a Secret in the AWS Secrets Manager with the `username`, `password`, `engine`, `host`, `port` and `dbClusterIdentifier`. The keys must be named as mentioned.  
+* Configure your AWS credentials into your computer. There are several ways to do this, the default and most recommended is creating a credentials file as shown [here](https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.html).
+* The AWS user must have the following permissions:
+  * IAM Access to Redshift Data API:
+    * DescribeStatement
+    * GetStatementResult
+    * ExecuteStatement
+    * BatchExecuteStatement
+  * IAM Access to SecretsManager:
+    * GetSecretValue
+
+> If your organization has more strict controls, you can also modify the `get_client` function in the `scripts/_boto_3_client.py` file to change parameters specifically for your organization's requirements. More details on the options can be found [here](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html).
+
+#### Automatic Bash
 
 This script uses Python and boto3 library as the API to connect and communicate with AWS services. In order for this to work you would first need to:
 
@@ -59,11 +79,29 @@ After completing these steps, you're now ready to execute the script.
 
 ### Usage
 
-#### Automatic
+#### Automatic Windows
 
 To use the script, follow these steps:
 
-* Navigate to the bin folder, and open the `create_ddls.bat` or `create_ddls.sh`, depending on your environment in a text editor.
+* Navigate to the bin folder, and open the `create_ddls.ps1` in a text editor.
+* In here, modify these variables:
+
+Variable|Description|Must be modified|
+--- | --- | ---
+OUTPUT_PATH|Output folder where the results will be saved to.|Y
+RS_CLUSTER|Your Redshift Cluster identifier.|Y
+RS_DATABASE|The Redshift Database that you're interested in extracting.|Y
+RS_SECRET_ARN|The Secret ARN with your credentials.|Y
+SCHEMA_FILTER|SQL statement to filter the schemas you're interested in. By default the script ignores the `pg_catalog`, `pg_internal` and `information_schema` schemas.|N
+MAX_ITERATIONS|AWS handles requests asyncrhonously, therefore we need to perform constant checks on the query for completion. This value sets the max iterations allowed before finishing the script. Every iteration waits 5 seconds|N
+
+* After modifying these variables, execute the scripts and your DDL Code should be extracted.
+
+#### Automatic Bash
+
+To use the script, follow these steps:
+
+* Navigate to the bin folder, and open the `create_ddls.sh` in a text editor.
 * In here, modify these variables:
 
 Variable|Description|Must be modified|
