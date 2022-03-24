@@ -1,10 +1,10 @@
-# RedShift Export Scripts
+# Redshift Export Scripts
 
 This repository provides some simple scripts to help exporting your Redshift Code so it can be migrated to [Snowflake](https://www.snowflake.com/) using [SnowConvert](https://www.mobilize.net/products/database-migrations/snowconvert).
 
 ## Version
 
-Release 2021-03-18
+Release 2021-03-24
 
 ## Usage
 
@@ -12,8 +12,8 @@ To start, please download this folder into your computer.
 
 This solution provides 3 alternatives to extract the data: 
 
-* Automatic Windows: A script written with PowerShell + AWS Cli
-* Automatic Bash: A script written with Bash + AWS Cli
+* Windows Script: A script written with PowerShell + AWS Cli
+* Bash (Linux/MacOS) Script: A script written with Bash + AWS Cli
 * Manual: SQL Queries to execute on your preferred SQL Editor
 
 ### Prerequisites
@@ -71,10 +71,10 @@ OUTPUT_PATH|Output folder where the results will be saved to.|Y
 RS_CLUSTER|Your Redshift Cluster identifier.|Y
 RS_DATABASE|The Redshift Database that you're interested in extracting.|Y
 RS_SECRET_ARN|The Secret ARN with your credentials.|Y
-SCHEMA_FILTER|SQL statement to filter the schemas you're interested in. By default the script ignores the `pg_catalog`, `pg_internal` and `information_schema` schemas.|N
+SCHEMA_FILTER|SQL statement to filter the schemas you're interested in. By default the script ignores the `information_schema`, `pg_catalog` and `pg_internal` schemas.|N
 MAX_ITERATIONS|AWS handles requests asynchronously, therefore we need to perform constant checks on the query for completion. This value sets the max iterations allowed before finishing the script. Every iteration waits 5 seconds|N
 
-* After modifying these variables, execute the scripts and your DDL Code should be extracted.
+* After modifying these variables, execute the scripts and your DDL Code should be extracted into the path you specified.
 
 #### Manual
 
@@ -91,7 +91,7 @@ view_ddl.sql|DDL_View.sql
 ## Notes
 
 * These queries to extract the code were based on the queries on [this repository](https://github.com/awslabs/amazon-redshift-utils/tree/master/src/AdminViews) and they were modified slightly or not at all.
-* Extracting the information from Redshift is performed asynchronously. This means that when an statement is sent to the database, the code will continue executing. For this there is a Timeout of 5 minutes to wait for a query to finish executing and it will check every 5 seconds if it's finished.
+* Extracting the information from Redshift is performed asynchronously. This means that when an statement is sent to the database, the code will continue executing. For this there is a Timeout of 5 minutes to wait for a query to finish executing and it will check every 5 seconds if it's finished by default, but it can be modified with the MAX_ITERATIONS variable. 
 
 ## Reporting issues and feedback
 

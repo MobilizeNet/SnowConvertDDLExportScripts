@@ -4,7 +4,7 @@
 # ---- Variables to change ----
 
 # General Variables
-OUTPUT_PATH="</example/path>"
+OUTPUT_PATH="/example/path"
 
 # AWS RedShift Variables
 RS_CLUSTER="<redshift_cluster_identifier>"
@@ -36,9 +36,11 @@ echo "Creating output folders..."
 
 ddl_output=$OUTPUT_PATH/object_extracts/DDL
 log_output=$OUTPUT_PATH/log
+temp_output=$OUTPUT_PATH/temp
 
 mkdir -p "$ddl_output"
 mkdir -p "$log_output"
+mkdir -p "$temp_output"
 mkdir -p "$OUTPUT_PATH/object_extracts"
 mkdir -p "$OUTPUT_PATH/object_extracts/DDL"
 
@@ -62,7 +64,7 @@ do
   # Read query from scripts folder
 	query=$(<$f)
 	# Replace {schema_filter} in the query template
-	final_query="${query/\{schema_filter\}/"$SCHEMA_FILTER"}"
+	final_query="${query/\{schema_filter\}/$SCHEMA_FILTER}"
 	# Execute query
 	response=$(aws redshift-data execute-statement --cluster-identifier $RS_CLUSTER --database $RS_DATABASE --secret-arn $RS_SECRET_ARN --sql "$final_query" --output yaml 2>&1)
   if [ $? -ne 0 ]
@@ -104,16 +106,16 @@ do
       echo "Validating completion for query ${parts[0]}..."
       statement_response=$(aws redshift-data describe-statement --id ${parts[1]} --output yaml)
       # Get statement status
-      re="Status: (\\w+)"
+      re="Status: ([a-zA-Z]*)"
       [[ $statement_response =~ $re ]] && status="${BASH_REMATCH[1]}"
-      if [ "$status" = "FINISHED" ]
+	    if [ "$status" = "FINISHED" ]
       then
         echo "Query finished, starting extraction..."
         # Extract query result into file
-        aws redshift-data get-statement-result --id ${parts[1]} --output text > "$ddl_output/${parts[0]}"
+        aws redshift-data get-statement-result --id ${parts[1]} --output text > "$temp_output/${parts[0]}"
         # Clean output (remove first 2 lines and prefix for RECORDS keyword
-        sed -i -e 1,2d "$ddl_output/${parts[0]}"
-        sed -i "s/^RECORDS\s//gm" "$ddl_output/${parts[0]}"
+        sed -e 1,2d "$temp_output/${parts[0]}" > "$ddl_output/${parts[0]}"
+        perl -i -pe 's/^RECORDS\s//g' "$ddl_output/${parts[0]}"
         # Add query to the remove list
         to_remove+=("$query")
       elif [ "$status" = "FAILED" ]
