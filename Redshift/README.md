@@ -13,7 +13,7 @@ To start, please download this folder into your computer.
 This solution provides 3 alternatives to extract the data: 
 
 * Windows Script: A script written with PowerShell + AWS Cli
-* Bash (Linux/MacOS) Script: A script written with Bash + AWS Cli
+* Bash (Linux/macOS) Script: A script written with Bash + AWS Cli
 * Manual: SQL Queries to execute on your preferred SQL Editor
 
 ### Prerequisites
@@ -36,7 +36,7 @@ Specific requirements for each type are:
 
 #### Script (Powershell or Bash)
 
-This script uses Powershell (Windows) or Bash (Linux), and AWS Cli (both platforms) to connect connect and communicate with AWS services. In order for this to work you first need to:
+This script uses Powershell (Windows) or Bash (Linux/macOS), and AWS Cli (both platforms) to connect and communicate with AWS services. In order for this to work you first need to:
 
 * Install AWS Cli. Instructions on how to install [can be found here](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 * Create a Secret in the AWS Secrets Manager with the `username`, `password`, `engine`, `host`, `port` and `dbClusterIdentifier`. The keys must be named as mentioned.  
@@ -72,7 +72,7 @@ RS_CLUSTER|Your Redshift Cluster identifier.|Y
 RS_DATABASE|The Redshift Database that you're interested in extracting.|Y
 RS_SECRET_ARN|The Secret ARN with your credentials.|Y
 SCHEMA_FILTER|SQL statement to filter the schemas you're interested in. By default the script ignores the `information_schema`, `pg_catalog` and `pg_internal` schemas.|N
-MAX_ITERATIONS|AWS handles requests asynchronously, therefore we need to perform constant checks on the query for completion. This value sets the max iterations allowed before finishing the script. Every iteration waits 5 seconds|N
+MAX_ITERATIONS|AWS handles requests asynchronously, therefore we need to perform constant checks on the query for completion. This value sets the max iterations allowed before finishing the script. Every iteration waits 5 seconds.|N
 
 * After modifying these variables, execute the scripts and your DDL Code should be extracted into the path you specified.
 
@@ -91,7 +91,7 @@ view_ddl.sql|DDL_View.sql
 ## Notes
 
 * These queries to extract the code were based on the queries on [this repository](https://github.com/awslabs/amazon-redshift-utils/tree/master/src/AdminViews) and they were modified slightly or not at all.
-* Extracting the information from Redshift is performed asynchronously. This means that when an statement is sent to the database, the code will continue executing. For this there is a Timeout of 5 minutes to wait for a query to finish executing and it will check every 5 seconds if it's finished by default, but it can be modified with the MAX_ITERATIONS variable. 
+* Extracting the information from Redshift is performed asynchronously. This means that when a statement is sent to the database, the code will continue executing. For this there is a Timeout of 5 minutes to wait for a query to finish executing and it will check every 5 seconds if it's finished by default, but it can be modified with the MAX_ITERATIONS variable. 
 
 ## Reporting issues and feedback
 
