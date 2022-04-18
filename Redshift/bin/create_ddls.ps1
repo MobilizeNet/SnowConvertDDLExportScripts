@@ -67,11 +67,14 @@ $files = (Get-ChildItem -Path ../scripts/* -Include *.sql).Name # Get list of qu
 Write-Output "Sending queries to execute..."
 foreach ( $file in $files)
 {
-    $query = Get-Content ..\scripts/$file -Raw
-    $query = $query.replace('{schema_filter}', $SCHEMA_FILTER)
-    # Execute queries on Resdshift
-    $response = aws redshift-data execute-statement --cluster-identifier $RS_CLUSTER --database $RS_DATABASE --secret-arn $RS_SECRET_ARN --sql "$query" | ConvertFrom-Json
-    $queries[$file] = $response.Id
+    if($file -ne "DDL_Alternate_Procedure.sql")
+    {
+        $query = Get-Content ..\scripts/$file -Raw
+        $query = $query.replace('{schema_filter}', $SCHEMA_FILTER)
+        # Execute queries on Resdshift
+        $response = aws redshift-data execute-statement --cluster-identifier $RS_CLUSTER --database $RS_DATABASE --secret-arn $RS_SECRET_ARN --sql "$query" | ConvertFrom-Json
+        $queries[$file] = $response.Id
+    }
 }
 
 Write-Output "Waiting 20 seconds for queries to finish..."

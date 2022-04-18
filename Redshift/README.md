@@ -98,6 +98,26 @@ view_ddl.sql|DDL_View.sql
 If you encounter any bugs with the tool please file an issue in the
 [Issues](https://github.com/MobilizeNet/SnowConvertDDLExportScripts/issues) section of our GitHub repo.
 
+## Known issues
+
+* There is a known issue when procedure code exceeds 65535 characters. `[22001] ERROR: value too long for type character varying(65535)`
+
+To solve this issue, we've setup an alternative script, which uses Python 3 and boto3. This script will change the way in which the procedures are extracted. To do so, please follow these steps:
+
+* Download Python for your OS [here](https://www.python.org/downloads/). There's an initialization script for both Windows or Unix-based environment.
+* After installing Python, install the boto3 library by executing: `pip install boto3`
+* Configure your AWS credentials into your computer. There are several ways to do this, the default and most recommended is creating a credentials file as shown [here](https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.html).
+> If your organization has more strict controls, you can also modify the `get_client` function in the `scripts/_boto_3_client.py` file to change parameters specifically for your organization's requirements. More details on the options can be found [here](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html).
+* Open the script corresponding to your environment on the folder `Redshift/bin/python_alternative`.
+* Change the variables as shown in the usage section. However, you will see some new variables:
+
+Variable|Description|Must be modified|
+--- | --- | ---
+BATCH_WAIT|The only way provided by Redshift to get the code for procedures without losing parameters' precision is by executing `SHOW PROCEDURE <procedure>`. This means that we have to query each procedure one by one, which means that a lot of queries are sent to the database at the same time. If you're having issues with Maximum concurrent statements, you can increase this value to send the batches in a more controlled manner. This will increase extraction time considerably on databases with a big number of procedures. The default value is 0.2 seconds.|N
+THREADS|Amount of threads to use to extract the code for procedures once their queries have been completed.|N
+
+Once you've modified these, you will be able to execute the script and avoid the issue. This process, however will take several minutes to extract depending on the amount of the procedures.
+
 ## License
 
 These export scripts are licensed under the [MIT license](https://github.com/MobilizeNet/SnowConvertDDLExportScripts/blob/main/Redshift/LICENSE.txt).
