@@ -63,20 +63,20 @@ for f in $files
 do
   # Read queries from scripts folder
   query=$(<$f)
-    # Replace {schema_filter} in the query template
-    final_query="${query/\{schema_filter\}/$SCHEMA_FILTER}"
-    # Execute query
-    response=$(aws redshift-data execute-statement --cluster-identifier $RS_CLUSTER --database $RS_DATABASE --secret-arn $RS_SECRET_ARN --sql "$final_query" --output yaml 2>&1)
-    if [ $? -ne 0 ]
-    then
-      # Log and print if there is an error
-      echo $response | tee -a "$log_output/log.txt"
-    else
-      # Extract Id from response
-      re="Id: ([[:xdigit:]]{8}(-[[:xdigit:]]{4}){3}-[[:xdigit:]]{12})"
-      [[ $response =~ $re ]] && queries[$i]="$f=${BASH_REMATCH[1]}"
-      i=$((i+1))
-    fi
+  # Replace {schema_filter} in the query template
+  final_query="${query/\{schema_filter\}/$SCHEMA_FILTER}"
+  # Execute query
+  response=$(aws redshift-data execute-statement --cluster-identifier $RS_CLUSTER --database $RS_DATABASE --secret-arn $RS_SECRET_ARN --sql "$final_query" --output yaml 2>&1)
+  if [ $? -ne 0 ]
+  then
+    # Log and print if there is an error
+    echo $response | tee -a "$log_output/log.txt"
+  else
+    # Extract Id from response
+    re="Id: ([[:xdigit:]]{8}(-[[:xdigit:]]{4}){3}-[[:xdigit:]]{12})"
+    [[ $response =~ $re ]] && queries[$i]="$f=${BASH_REMATCH[1]}"
+    i=$((i+1))
+  fi
 done
 
 if [ ${#queries[@]} -eq 0 ]
