@@ -27,4 +27,4 @@ mkdir %OUTPUT_PATH%\object_extracts\DDL
 REM mkdir %OUTPUT_PATH%\object_extracts\Reports
 REM mkdir %OUTPUT_PATH%\object_extracts\Storage
 
-python ../../scripts/_ddl_extractor.py --rs-cluster %RS_CLUSTER% --rs-database %RS_DATABASE% --rs-secret-arn %RS_SECRET_ARN% --output-path %OUTPUT_PATH% --schema-filter %SCHEMA_FILTER% --batch-wait %BATCH_WAIT% --threads %THREADS%
+python ../scripts/_ddl_extractor.py --rs-cluster %RS_CLUSTER% --rs-database %RS_DATABASE% --rs-secret-arn %RS_SECRET_ARN% --output-path %OUTPUT_PATH% --schema-filter %SCHEMA_FILTER% --batch-wait %BATCH_WAIT% --threads %THREADS%

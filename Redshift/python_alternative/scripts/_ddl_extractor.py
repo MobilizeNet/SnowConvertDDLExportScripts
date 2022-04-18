@@ -180,9 +180,9 @@ def read_ddl_queries():
             with open(f, 'r') as file:
                 object_type = object_type_regex.group(1)
                 file_content = file.read()
-                if object_type == 'Alternate_Procedure':
+                if object_type == 'Procedure':
                     queries.append(ProcedureQuery("Procedure", file_content, OUT_PATH, SCHEMA_FILTER))
-                elif object_type != 'Procedure':
+                else:
                     queries.append(Query(object_type, file_content, OUT_PATH, SCHEMA_FILTER))
 
     return queries

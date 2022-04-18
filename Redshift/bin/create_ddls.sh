@@ -61,10 +61,8 @@ i=0
 echo "Sending queries to execute..."
 for f in $files
 do
-  # Read query from scripts folder
-  if [ "$f" != "DDL_Alternate_Procedure.sql" ]
-  then
-    query=$(<$f)
+  # Read queries from scripts folder
+  query=$(<$f)
     # Replace {schema_filter} in the query template
     final_query="${query/\{schema_filter\}/$SCHEMA_FILTER}"
     # Execute query
@@ -79,8 +77,6 @@ do
       [[ $response =~ $re ]] && queries[$i]="$f=${BASH_REMATCH[1]}"
       i=$((i+1))
     fi
-  fi
-
 done
 
 if [ ${#queries[@]} -eq 0 ]
