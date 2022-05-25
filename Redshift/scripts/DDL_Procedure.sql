@@ -95,6 +95,7 @@ select schemaname, proc_name, proc_oid
 , substr(prosrc,440001,20000) as s_23
 , substr(prosrc,460001,20000) as s_24
 , substr(prosrc,480001,20000) as s_25
+-- Extend 1
 
 , reverse(s_01) as r_01
 , reverse(s_02) as r_02
@@ -121,6 +122,7 @@ select schemaname, proc_name, proc_oid
 , reverse(s_23) as r_23
 , reverse(s_24) as r_24
 , reverse(s_25) as r_25
+-- Extend 2
 
 , len(s_01) as l_01
 , len(s_02) as l_02
@@ -147,6 +149,7 @@ select schemaname, proc_name, proc_oid
 , len(s_23) as l_23
 , len(s_24) as l_24
 , len(s_25) as l_25
+-- Extend 3
 
 , len(prosrc)  as len_prosrc
        from body_source
@@ -426,6 +429,7 @@ FROM
             , substr(s_24,20001 - prior_last_space,prior_last_space)::varchar(64000) as prior_end_str
             , prior_end_str || substr(s_25,1,20001 - last_space)::varchar(64000) as ddl
            from body_source2 where l_25 > 0
+        -- Extend 4
         UNION ALL
             select schemaname, proc_name, proc_oid, 4999 as seq
                 , 0 as last_space

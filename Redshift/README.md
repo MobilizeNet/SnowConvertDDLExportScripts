@@ -98,6 +98,35 @@ view_ddl.sql|DDL_View.sql
 If you encounter any bugs with the tool please file an issue in the
 [Issues](https://github.com/MobilizeNet/SnowConvertDDLExportScripts/issues) section of our GitHub repo.
 
+## Known issues
+
+This code extracts code by executing queries to the database meaning that there is a maximum of ~64.000 characters in a column. The SQL has been tweaked to split the Procedure code into several sections allowing a maximum of 500.000 characters. In case your procedures are longer, the code will be truncated. To solve this issue, you can modify the query to allow for more characters. To do so, follow these steps:
+
+1) Open `Redshift/bin/scripts/DDL_Procedure.sql`.
+2) Look for `-- Extend 1` and add the following line: `, substr(prosrc,500001,20000) as s_26`. For extra lines, add `20000` to the first parameter and add 1 to the column identifier, like this: `, substr(prosrc,520001,20000) as s_27`
+3) Look for `-- Extend 2` and add the following line: `, reverse(s_26) as r_26`. For extra lines, add 1 to both the column in the `reverse` function, as well as the identifier, like this: `, reverse(s_27) as r_27`.
+4) Look for `-- Extend 3` and add the following line: `, len(s_26) as l_26`. For extra lines, add 1 to both the column in the `len` function, as well as the identifier, like this: `, reverse(l_27) as l_27`.
+5) Look for `-- Extend 4` and add the following line: 
+```sql
+UNION ALL
+select 
+  schemaname, proc_name, proc_oid, 4026 /* 1 */ as seq
+  , position(' ' in r_26 /* 2 */) as last_space
+  , position(' ' in r_25 /* 3 */) as prior_last_space
+  , substr(s_25 /* 4 */,20001 - prior_last_space,prior_last_space)::varchar(64000) as prior_end_str
+  , prior_end_str || substr(s_26 /* 5 */,1,20001 - last_space)::varchar(64000) as ddl
+from body_source2 where l_26 /* 6 */ > 0
+```
+
+For extra lines, you will need to modify the sections (`/* n */`) from the previous query in the above code and add after the previous query. The value to change are as follows:
+* `/* 1 */`: new sequence number for query. Add one to the seq from previous query.
+* `/* 2 */`: new r_column (from `Step 3`).
+* `/* 3 */`: previous r_column.
+* `/* 4 */`: previous s_column.
+* `/* 5 */`: new s_column (from `Step 2`).
+* `/* 6 */`: new l_column (from `Step 4`).
+
+
 ## License
 
 These export scripts are licensed under the [MIT license](https://github.com/MobilizeNet/SnowConvertDDLExportScripts/blob/main/Redshift/LICENSE.txt).
