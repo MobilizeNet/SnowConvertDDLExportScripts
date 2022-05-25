@@ -98,12 +98,6 @@ view_ddl.sql|DDL_View.sql
 If you encounter any bugs with the tool please file an issue in the
 [Issues](https://github.com/MobilizeNet/SnowConvertDDLExportScripts/issues) section of our GitHub repo.
 
-## Known issues
-
-* There is a known issue when procedure code exceeds 65535 characters. `[22001] ERROR: value too long for type character varying(65535)`
-
-To solve this issue, we set up a Python alternative. Please refer to the `python_alternative` folder for more information. 
-
 ## License
 
 These export scripts are licensed under the [MIT license](https://github.com/MobilizeNet/SnowConvertDDLExportScripts/blob/main/Redshift/LICENSE.txt).
